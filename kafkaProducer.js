@@ -32,6 +32,8 @@ module.exports = function(collection, callback) {
             // Parse data and add fields
             getMessageFromChange(c).then(message => {
 
+                console.log(`message: ${JSON.stringify(message)}`);
+
                 // Ignore unexpected messages
                 if (!message) return;
 

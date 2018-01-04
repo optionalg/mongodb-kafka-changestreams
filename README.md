@@ -12,34 +12,59 @@ This example application uses the new MongoDB 3.6 change streams feature to send
 
 This application was built using versions of the following software:
 
-- [MongoDB version 3.6.0-rc2](https://www.mongodb.com/download-center#development)
-- [MongoDB Node.js driver version 3.0.0](https://github.com/mongodb/node-mongodb-native/tree/3.0.0)
-- [Kafka version 1.0.0](https://kafka.apache.org/downloads)
-- Node.JS version 8.9.0
-- NPM version 5.5.1
+- [MongoDB version 3.6.x (or later)](https://www.mongodb.com/download-center#production)
+- [MongoDB Node.js driver version 3.x (or later)](https://www.npmjs.com/package/mongodb)
+- [Kafka version 1.x](https://kafka.apache.org/downloads) (or later) or [Confluent Open Source 4.x](https://www.confluent.io/download/) (or later)
+- [Node.JS](https://nodejs.org) version 8.9.0 (or later)
+- NPM version 5.5.1 (or later)
 
-## Setup & Run 
+## Setup & Run
 
 Install Node.js packages:
 
 ```npm install```
 
-[Start Zookeeper (optional) and Kafka](https://kafka.apache.org/quickstart) with Kafka listening on `localhost:9092`.
+[Start Zookeeper (optional) and Kafka](https://kafka.apache.org/quickstart) with Kafka listening on `localhost:9092`. You may also use Confluent with the default command `confluent start`.
 
-Edit configuration options in [config.js](config.js)
+If necessary, edit configuration options in [config.js](config.js)
 
-Start a MongoDB replica set with version 3.6.0-rc0 or higher. This example uses one node as an example, but a replica set should always have at least 3 nodes. See [Deploying a Replica Set](https://docs.mongodb.com/manual/tutorial/deploy-replica-set/).
+Start a MongoDB replica set with version 3.6.0 or higher. This example uses one node as an example, but a production replica set should always have at least 3 nodes. See [Deploying a Replica Set](https://docs.mongodb.com/manual/tutorial/deploy-replica-set/).
 
-```
+```shell
 mkdir -p data/rs1/db
 mongod --dbpath data/rs1/db --port 27000 --enableMajorityReadConcern --replSet replset
+
+````
+Start a Mongo shell with
+
+        mongo --port 27000
+
+In the Mongo shell, enter the following to create the MongoDB replica set:
+
+```javascript
+rsconf = {
+  _id: "replset",
+  members: [
+    {
+     _id: 0,
+     host: "localhost:27000"
+    }
+   ]
+}
+
+rs.initiate( rsconf )
 ```
+
+In the `bin` folder of your Kafka installation, run the following to create the `market-data` topics in 3 partitions (one for each of the 3 stocks we're tracking - MSFT, GOOG and FB):
+
+        kafka-topics.sh --create --zookeeper localhost:2181 --topic market-data --replication-factor 1 --partitions 3
+
 
 Start the Kafka Producer:
 
 ```npm run producer```
 
-Start the Consumer webapp:
+Start the Consumer web application:
 
 ```npm run server```
 
